@@ -44,7 +44,18 @@ void del(string name){//删除符号
 		}
 }
 
-/*int main(){
+void display(){
+    cout << "                  **符号表**                  " << endl;
+    cout << "---------------------------------------------" << endl;
+    cout << "     符号名     ｜     类型     ｜      值      " << endl;
+    cout << "---------------------------------------------" << endl;
+    for (int i=0; i< Tablelink[0].level_table.size(); i++){
+        cout << "       " << Tablelink[0].level_table[i].identity << "            " << Tablelink[0].level_table[i].type << "             " << Tablelink[0].level_table[i].val;
+        cout << endl;
+    }
+}
+
+int main(){
     string a = "a";
     string int_d = "int_d";
     string b = "b";
@@ -61,11 +72,13 @@ void del(string name){//删除符号
 
     cout << Tablelink[0].level_table.size() << endl;
     cout << Tablelink[0].level_table[0].identity << endl;
+    display();
     del(a);
     cout << Tablelink[0].level_table.size() << endl;
     cout << Tablelink[0].level_table[0].identity << endl;
+    display();
     return 0;
 }
-*/
+
 
 

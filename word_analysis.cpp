@@ -4,50 +4,6 @@
 #include<string>
 using namespace std;
 
-struct table {
-	string identity;    //定义名称
-	string type;        //类型-const等
-	int val;            //值
-	//int addr;         //偏移量
-};
-
-struct tablelink {
-	vector<table> level_table;
-	//int level;
-}Tablelink[200];        //符号表
-
-
-
-int find(string name) {//查找符号
-	for (int i = 0; i < Tablelink[0].level_table.size(); i++)
-	{
-		if (Tablelink[0].level_table[i].identity == name)
-		{
-			return i;
-		}
-	}
-	return -1;
-}
-
-void add(string name, string type, int val) {//添加符号
-	table new_symbol;
-	new_symbol.identity = name;
-	new_symbol.type = type;
-	new_symbol.val = val;
-	Tablelink[0].level_table.push_back(new_symbol);
-}
-
-void del(string name) {//删除符号
-	for (int i = 0; i < Tablelink[0].level_table.size(); i++)
-	{
-		if (Tablelink[0].level_table[i].identity == name)
-		{
-			Tablelink[0].level_table.erase(Tablelink[0].level_table.begin() + i);
-		}
-	}
-}
-
-
 string pretreat()
 {
 	fstream file;
@@ -208,19 +164,90 @@ int judge_id(vector<Category> cate, string str)
 }
 
 
-void create_table(vector<Category> cate, string source_str)
+struct table {
+	string identity;    //定义名称
+	string type;        //类型-const等
+	int val;            //值
+	//int addr;         //偏移量
+};
+
+struct tablelink {
+	vector<table> level_table;
+	//int level;
+}Tablelink[200];        //符号表
+
+int find(string name) {//查找符号
+	for (int i = 0; i < Tablelink[0].level_table.size(); i++)
+	{
+		if (Tablelink[0].level_table[i].identity == name)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+void add(string name, string type, int val) {//添加符号
+	table new_symbol;
+	new_symbol.identity = name;
+	new_symbol.type = type;
+	new_symbol.val = val;
+	Tablelink[0].level_table.push_back(new_symbol);
+}
+
+void del(string name) {//删除符号
+	for (int i = 0; i < Tablelink[0].level_table.size(); i++)
+	{
+		if (Tablelink[0].level_table[i].identity == name)
+		{
+			Tablelink[0].level_table.erase(Tablelink[0].level_table.begin() + i);
+		}
+	}
+}
+
+void display(){
+    cout << "                  **符号表**                  " << endl;
+    cout << "---------------------------------------------" << endl;
+    cout << "     符号名     ｜     类型     ｜      值      " << endl;
+    cout << "---------------------------------------------" << endl;
+    for (int i=0; i< Tablelink[0].level_table.size(); i++){
+        cout << "       " << Tablelink[0].level_table[i].identity << "            " << Tablelink[0].level_table[i].type << "             " << Tablelink[0].level_table[i].val;
+        cout << endl;
+    }
+}
+
+void create_table(vector<Category> cate, string source_str, vector<Category> &source_cate)
 {
 	int flag;
+	int judge;
 	string str;
+	Category temp;
 	//string last_str;
 	for (unsigned i = 0; i < source_str.size(); i++) {
 		if (source_str[i] != ' ') {
 			str.push_back(source_str[i]);
 		}
-		else if(judge_id(cate, str)){
-			flag = find(str);
-			if (flag == -1) {
-				add(str, "NULL", 0);
+		else {
+			judge = 0;
+			for (unsigned i = 0; i < cate.size(); i++) {
+				if (str == cate[i].name) {
+					temp.name = str;
+					temp.num = cate[i].num;
+					source_cate.push_back(temp);
+					judge = 1;
+					break;
+				}
+			}
+			if (judge == 0) {
+				temp.name = str;
+				temp.num = 150;
+				source_cate.push_back(temp);
+				if (judge_id(cate, str)) {
+					flag = find(str);
+					if (flag == -1) {
+						add(str, "NULL", 0);
+					}
+				}
 			}
 			str.clear();
 		}
@@ -235,21 +262,23 @@ vector<Category> lex()
 	//cout << source_str;
 
 	vector<Category> cate;
-	category(cate);
-	create_table(cate, source_str);
+	vector<Category> source_cate;
 
-	return cate;
+	category(cate);
+	create_table(cate, source_str, source_cate);
+
+	return source_cate;
 }
 
 
 
 int main()
 {
-	vector<Category> cate;
-	cate = lex();
-	cout << cate.size() << endl;
-	for (unsigned i = 0; i < cate.size(); i++) {
-		cout << cate[i].num << " " << cate[i].name << endl;
+	vector<Category> source_cate;
+	source_cate = lex();
+	for (unsigned i = 0; i < source_cate.size(); i++) {
+		cout << "<" << source_cate[i].num << "," << source_cate[i].name << ">" << endl;
 	}
+	display();
 	return 0;
 }
