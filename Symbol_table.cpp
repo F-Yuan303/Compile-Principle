@@ -7,6 +7,7 @@ struct table {
 	string type;        //类型-const等
 	int val;            //值
 	//int addr;         //偏移量
+    //123
 };
 
 struct tablelink {
