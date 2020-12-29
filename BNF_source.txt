@@ -1,19 +1,15 @@
 program -> declaration-list
-declaration-list -> declaration declaration-list'
-declaration-list' -> declaration declaration-list' | empty
+declaration-list -> declaration-list declaration | declaration
 declaration -> var-declaration | fun-declaration                         
 var-declaration -> type-specifier ID ; | type-specifier ID [ NUM ] ;       
 type-specifier -> int | void
 fun-declaration -> type-specifier ID ( params ) | compound-stmt
 params -> params-list | void
-params-list -> param params-list'
-params-list' -> , param params-list' | empty
+params-list -> params-list , param | param
 param -> type-specifier ID | type-specifier ID [ ]
 compound-stmt -> { local-declarations statement-list }
-local-declarations -> local-declarations'
-local-declarations' -> var-declaration local-declarations' | empty
-statement-list ->  statement-list'
-statement-list' -> statement statement-list' | empty
+local-declarations -> local-declarations var-declaration | empty
+statement-list -> statement-list statement | empty
 statement -> expression-stmt | compound-stmt | selection-stmt | iteration-stmt | return-stmt
 expression-stmt -> expression ; | ;
 selection-stmt -> if ( expression ) statement | if ( expression ) statement else statement
@@ -23,14 +19,11 @@ expression -> var = expression | simple-expression
 var -> ID | ID [ expression ]
 simple-expression -> additive-expression relop additive-expression | additive-expression
 relop -> <= | < | > | >= | == | !=
-additive-expression -> term additive-expression'
-additive-expression' -> addop term additive-expression' | empty
+additive-expression -> additive-expression addop term | term
 addop -> + | -
-term -> factor term'
-term' -> mulop factor term' | empty
+term -> term mulop factor | factor
 mulop -> * | /
 factor -> ( expression ) | var | call | NUM
 call -> ID ( args )
 args -> args-list | empty
-args-list -> expression args-list'
-args-list' -> , expression args-list' | empty
+args-list -> args-list , expression | expression
