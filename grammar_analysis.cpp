@@ -34,9 +34,9 @@ void read_file(){        //读入数据，生成非终结符
             if (str[i] != ' ' && str[i] != '\0')
                 str1 += str[i];
             else {
-                //cout << str1 << "         ";
                 if (str1 != "" && str1 == "->")
                     flag = 0;
+                /*
                 else if (str1 != "" && str1 == "|"){  //处理多条规则
                     str1 = "";
                     temp_key = Grammer.produce[Grammer.pcount].key;
@@ -44,6 +44,7 @@ void read_file(){        //读入数据，生成非终结符
                     Grammer.produce[Grammer.pcount].key = temp_key;
                     continue;
                 }
+                */
                 else if (str1 != "" && flag == 1){
                     Grammer.produce[Grammer.pcount].key = str1;
                     Grammer.vn.push_back(str1);
@@ -53,12 +54,10 @@ void read_file(){        //读入数据，生成非终结符
                 str1 = "";
             }
         }
-        //cout << Grammer.produce[Grammer.pcount].key << endl;
         Grammer.pcount ++;
     }
     bnf.close();
     Grammer.start = Grammer.produce[0].key;
-
 }
 
 void make_vt(){         //生成终结符
@@ -103,14 +102,14 @@ void follow_list(){
 int main(){
     read_file();
     make_vt();
-    /*
+    
     for (int i=0; i< Grammer.pcount; i++){
         cout << Grammer.produce[i].key << ":   ";
         for (int j=0; j<Grammer.produce[i].value.size(); j++)
             cout << Grammer.produce[i].value[j] << "  ";
         cout << endl;
     }
-    
+    /*
     for (int i=0; i<Grammer.vn.size(); i++)
         cout << Grammer.vn[i] << "  ";
     cout << endl << endl;
