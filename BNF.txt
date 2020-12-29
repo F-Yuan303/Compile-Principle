@@ -1,7 +1,7 @@
 program -> declaration-list
 declaration-list -> declaration-list declaration | declaration
 declaration -> var-declaration | fun-declaration                         
-var-declaration -> type-specifier ID; | type-specifier ID [ NUM ];       
+var-declaration -> type-specifier ID ; | type-specifier ID [ NUM ] ;       
 type-specifier -> int | void
 fun-declaration -> type-specifier ID ( params ) | compound-stmt
 params -> params-list | void
