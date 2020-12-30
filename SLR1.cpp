@@ -7,7 +7,7 @@ using namespace std;
 typedef struct P{
     string key;           // 产生式左部
     vector<string> value;  // 产生式右部
-    //int count;          // 几组规则
+    int doc;          // 点的位置
 }P;
 typedef struct G{
     vector<string> vn ;     // 非终结符集合
@@ -124,8 +124,10 @@ void project_set_create(){                      //构建项目集
     for (int i=0; i<Grammer.pcount; i++){              
         tmp_p.produce.push_back(Grammer.produce[i]);
     }
-    for (int i=0; i<tmp_p.produce.size(); i++)
+    for (int i=0; i<tmp_p.produce.size(); i++){
         tmp_p.produce[i].value.insert(tmp_p.produce[i].value.begin(), ".");
+        tmp_p.produce[i].doc = 0;
+    }
     project_set.push_back(tmp_p);
     /*
     for (int i=0; i<project_set.size(); i++)
@@ -151,12 +153,14 @@ void project_set_create(){                      //构建项目集
             produce_locate = 0;
         }
         for (int i=produce_locate; i<project_set[tmp_layer].produce.size(); i++){  //分析某一个项目集中的每一句产生式子
-            doc_locate = 0;
+            /*
             for (int j=0; j<project_set[tmp_layer].produce[i].value.size(); j++){  //寻找当前产生式子点的位置
                 if (project_set[tmp_layer].produce[i].value[j] == "."){
                         doc_locate = j;
                 }
             }
+            */
+            doc_locate = project_set[tmp_layer].produce[i].doc;
             //进行分析
             for (int j=0; j< Grammer.vn.size(); j++)
                 if (project_set[tmp_layer].produce[i].value[doc_locate + 1] == Grammer.vn[j]){ //当点的下一个为非终结符
@@ -165,41 +169,52 @@ void project_set_create(){                      //构建项目集
                         tmp_produce.value.push_back(project_set[tmp_layer].produce[i].value[k]);
                     tmp_produce.value.push_back(project_set[tmp_layer].produce[i].value[doc_locate+1]);
                     tmp_produce.value.push_back(".");
+                    tmp_produce.doc = doc_locate + 1;
                     for (int k=doc_locate+2; k<project_set[tmp_layer].produce[i].value.size(); k++)
                         tmp_produce.value.push_back(project_set[tmp_layer].produce[i].value[k]);
-                    tmp_p.produce.push_back(tmp_produce);   //添加当前产生式子
+                    tmp_p.produce.push_back(tmp_produce);   //添加当前产生式
                     //从第一个项目集中寻找并添加这个非终结符生成新的产生式子
-                    string tmp_key = tmp_produce.key;
-                    for (int k=0; k<project_set[0].produce.size(); k++){
-
-
+                    int line = 0;
+                    int total = tmp_p.produce.size();
+                    while (line <= total){   //遍历这个新项目集
+                        for (int k=0; k< Grammer.vn.size(); k++){
+                            if (tmp_p.produce[line].value[tmp_p.produce[line].doc+1] == Grammer.vn[k]){
+                                for (int m=0; m<project_set[0].produce.size(); m++){
+                                    /*
+                                    if (project_set[0].produce[m].key == Grammer.vn[k]){       //找到后加入到项目集中
+                                        tmp_p.produce.push_back(project_set[0].produce[m]);
+                                    }
+                                    */
+                                }
+                            }
+                        }
+                        total = tmp_p.produce.size();
+                        line++;
                     }
+                    
                     tmp_produce.value.clear();                   //清空暂时产生式
 
                     //在当前项目集中往下遍历看是否还有需要添加的
                     for (int k=i+1; k<project_set[tmp_layer].produce.size(); k++){
-                        for (int m=0; m<project_set[tmp_layer].produce[k].value.size(); m++){
-                            if (project_set[tmp_layer].produce[k].value[m] == "."){
-                                doc_locate = m;
-                                if (project_set[tmp_layer].produce[k].value[m+1] == Grammer.vn[j]){
-                                    tmp_produce.key = project_set[tmp_layer].produce[k].key;
-                                    for (int n=0; n<doc_locate; n++)
-                                        tmp_produce.value.push_back(project_set[tmp_layer].produce[k].value[n]);
-                                    tmp_produce.value.push_back(project_set[tmp_layer].produce[k].value[doc_locate+1]);
-                                    tmp_produce.value.push_back(".");
-                                    for (int n=doc_locate+2; n<project_set[tmp_layer].produce[k].value.size(); n++)
-                                        tmp_produce.value.push_back(project_set[tmp_layer].produce[k].value[n]);
-                                    tmp_p.produce.push_back(tmp_produce);   //添加当前产生式子
-                                    //从第一个项目集中寻找并添加这个非终结符生成新的产生式子（需要判断是否存在重复）
-                                    string tmp_key = tmp_produce.key;
-                                    for (int n=0; n<project_set[0].produce.size(); n++){
+                        doc_locate = project_set[tmp_layer].produce[k].doc;
+                        if (project_set[tmp_layer].produce[k].value[doc_locate+1] == Grammer.vn[j]){
+                            tmp_produce.key = project_set[tmp_layer].produce[k].key;
+                            for (int n=0; n<doc_locate; n++)
+                                tmp_produce.value.push_back(project_set[tmp_layer].produce[k].value[n]);
+                            tmp_produce.value.push_back(project_set[tmp_layer].produce[k].value[doc_locate+1]);
+                            tmp_produce.value.push_back(".");
+                            tmp_produce.doc = doc_locate + 1;
+                            for (int n=doc_locate+2; n<project_set[tmp_layer].produce[k].value.size(); n++)
+                                tmp_produce.value.push_back(project_set[tmp_layer].produce[k].value[n]);
+                            tmp_p.produce.push_back(tmp_produce);   //添加当前产生式子
+                            //从第一个项目集中寻找并添加这个非终结符生成新的产生式子（需要判断是否存在重复）
+                            string tmp_key = tmp_produce.key;
+                            for (int n=0; n<project_set[0].produce.size(); n++){
 
 
                                         
-                                    }
-                                    tmp_produce.value.clear();                   //清空暂时产生式
-                                }
                             }
+                        tmp_produce.value.clear();                   //清空暂时产生式
                         }
                     }
                     //判断这个新生成的项目集是否已存在，若不存在，加入到项目集集合中
