@@ -23,8 +23,8 @@ typedef struct G {
 G Grammer;
 vector<vector<string> > first_set;
 
-/********************消除左递归_start**********************/
 
+/**********************读文件_start*************************/
 void read_file() {        //读入数据，生成非终结符
     Grammer.pcount = 0;
     string str, str1, temp_key;
@@ -81,7 +81,10 @@ void print_grammer()
         cout << endl;
     }
 }
+/*********************读文件_end******************************/
 
+
+/********************消除左递归_start**********************/
 int search_vn(string str)
 {
     for (unsigned i = 0; i < Grammer.vn.size(); i++) {
@@ -143,10 +146,12 @@ void directly(vector<int> &direct)
 
 void direct_left_recur(vector<int> direct)
 {
-    vector<vector<string> > temp1;      //P的产生式右部
-    vector<vector<string> > temp2;      //P'的产生式右部
+    vector<vector<string> > temp1;      //P'的产生式右部
+    vector<vector<string> > temp2;      //P的产生式右部
     vector<string> mer;                 //合并的临时变量
     string str;
+    vector<string> empty;
+    empty.push_back("empty");
     unsigned n = Grammer.vn.size();
     for (unsigned i = 0; i < n; i++) {
         if (direct[i] == 1) {
@@ -158,16 +163,21 @@ void direct_left_recur(vector<int> direct)
                     mer.push_back(str);
                     temp1.push_back(mer);
                 }
-                else {
+                else if (Grammer.produce[i].value[j].size() > 1 || (Grammer.produce[i].value[j].size() == 1 && Grammer.produce[i].value[j][0] != "empty")) {
                     mer = Grammer.produce[i].value[j];
+                    mer.push_back(str);
+                    temp2.push_back(mer);
+                }
+                else if (Grammer.produce[i].value[j].size() == 1 && Grammer.produce[i].value[j][0] == "empty") {
                     mer.push_back(str);
                     temp2.push_back(mer);
                 }
                 mer.clear();
             }
-            Grammer.produce[i].value = temp1;
+            Grammer.produce[i].value = temp2;
             Grammer.produce[Grammer.pcount].key = str;
-            Grammer.produce[Grammer.pcount].value = temp2;
+            temp1.push_back(empty);
+            Grammer.produce[Grammer.pcount].value = temp1;
             Grammer.vn.push_back(str);
             Grammer.pcount++;
             temp1.clear();
@@ -190,18 +200,119 @@ void left_recur()
             cout << Grammer.produce[i].key << ":" << direct[i] << endl;
     }
 
-    cout << "消除间接左递归后：" << endl;
+    cout << endl << "/********************************消除间接左递归后：***********************************/" << endl;
     print_grammer();
     direct_left_recur(direct);
-    cout << "消除直接左递归后：" << endl;
+    cout << endl << "/********************************消除直接左递归后：***********************************/" << endl;
     print_grammer();
 
 }
 
-
 /********************消除左递归_end**********************/
 
+/********************提左因子_start**********************/
+
+bool extract_left_factor()
+{
+    bool judge_over = true;
+    vector<string> common_factor;
+    int time;
+    vector<vector<string> > new_val;               //存新的产生式
+    vector<unsigned> del;
+    vector<vector<string> > temp;
+    unsigned m;
+    int n = Grammer.vn.size();
+    for (unsigned i = 0; i < n; i++) {
+        for (unsigned j = 0; j < Grammer.produce[i].value.size(); j++) {
+            time = 1;
+            for (unsigned k = j + 1; k < Grammer.produce[i].value.size(); k++) {
+                if (Grammer.produce[i].value[j][0] == Grammer.produce[i].value[k][0]) {
+                    if (time == 1) {
+                        judge_over = false;
+                        time = 0;
+                        common_factor.push_back(Grammer.produce[i].value[j][0]);
+                        del.push_back(j);            //记得要清空
+                        new_val.push_back(Grammer.produce[i].value[j]);
+                    }
+                    del.push_back(k);
+                    new_val.push_back(Grammer.produce[i].value[k]);
+                }
+            }
+            if (time == 0) {        //有公共左因子
+                for (unsigned p = 0; p < new_val.size(); p++) {         //删除第一个单词
+                    new_val[p].erase(new_val[p].begin());
+                    if (new_val[p].size() == 0)
+                        new_val[p].push_back("empty");
+                }
+                //添加新产生式
+                Grammer.produce[Grammer.pcount].key = Grammer.produce[i].key + "_t";
+                Grammer.produce[Grammer.pcount].value = new_val;
+                Grammer.vn.push_back(Grammer.produce[Grammer.pcount].key);
+                Grammer.pcount++;
+                //删除旧产生式的有公共左因子的单词串
+
+                m = 0;
+                for (unsigned p = 0; p < Grammer.produce[i].value.size(); p++) {
+                    if (m < del.size() && p == del[m]) {
+                        m++;
+                        continue;
+                    }
+                    else {
+                        temp.push_back(Grammer.produce[i].value[p]);
+                    }
+                }
+                Grammer.produce[i].value = temp;
+                temp.clear();
+
+
+                //再添加新的一个单词串到旧的产生式中
+                common_factor.push_back(Grammer.produce[i].key + "_t");
+                Grammer.produce[i].value.push_back(common_factor);
+                common_factor.clear();
+                //cout << endl;
+                //cout << Grammer.produce[i].key << ":  ";
+                //for (unsigned p1 = 0; p1 < Grammer.produce[i].value.size(); p1++) {
+                //    for (unsigned p2 = 0; p2 < Grammer.produce[i].value[p1].size(); p2++) {
+                //        cout << Grammer.produce[i].value[p1][p2] << " ";
+                //    }
+                //    cout << "|";
+                //}
+                //cout << endl;
+                //cout << endl;
+                //cout << Grammer.produce[i].key + "_t" << " :   ";
+                //for (unsigned p1 = 0; p1 < new_val.size(); p1++) {
+                //    for (unsigned p2 = 0; p2 < new_val[p1].size(); p2++) {
+                //        cout << new_val[p1][p2] << " ";
+                //    }
+                //    cout << "|";
+                //}
+
+
+                del.clear();
+                new_val.clear();
+                break;
+            }
+        }
+    }
+    return judge_over;
+}
+
+void extract_left_factor_main()
+{
+    while (1) {
+        if (extract_left_factor())
+            break;
+    }
+
+    cout << endl << "/********************************提取左公共因子后：***********************************/" << endl;
+    print_grammer();
+
+}
+
+/********************提左因子_end**********************/
+
 /***********************first集_start********************/
+
 bool judge_rm_empty(vector<string>& str)
 {
     vector<string> temp;
@@ -280,7 +391,8 @@ void first_main()
         first_set.push_back(first(i));
     }
     rm_rep();
-    cout << "first集如下：" << endl;
+    cout << endl << "/********************************first集：***********************************/" << endl;
+    //cout << "first集如下：" << endl;
     for (unsigned i = 0; i < first_set.size(); i++) {
         cout << Grammer.vn[i] << ":  ";
         for (unsigned j = 0; j < first_set[i].size(); j++) {
@@ -288,25 +400,11 @@ void first_main()
         }
         cout << endl;
     }
-
-
-
 }
 
-
-
 /***********************first集_end********************/
-/***********************follow集_start********************/
 
-//bool judge_empty(int i)
-//{
-//    for (unsigned j = 0; j < Grammer.produce[i].value.size(); j++) {
-//        if (Grammer.produce[i].value[j].size() == 1 && Grammer.produce[i].value[j][0] == "empty") {
-//            return true;
-//        }
-//    }
-//    return false;
-//}
+/***********************follow集_start********************/
 
 vector<string>  first_part(vector<string> val)
 {
@@ -323,6 +421,10 @@ vector<string>  first_part(vector<string> val)
             if (judge_rm_empty(first)) {
                 if (i < val.size() - 1) {
                     num = search_vn(val[i + 1]);
+                    if (num == -1) {
+                        first.push_back(val[i + 1]);
+                        return first;
+                    }
                 }
                 else {
                     first.push_back("empty");
@@ -396,7 +498,6 @@ bool follow(vector<vector<string> > &follow_set, vector<int> &num_follow)
                         follow_set[num].insert(follow_set[num].end(), follow_set[num_key].begin(), follow_set[num_key].end());
                     }
                 }
-
             }
         }
     }
@@ -406,7 +507,7 @@ bool follow(vector<vector<string> > &follow_set, vector<int> &num_follow)
 }
 
 
-void follow_main()
+vector<vector<string> > follow_main()
 {
     vector<vector<string> > follow_set(Grammer.pcount);
     vector<int> num_follow(Grammer.pcount);
@@ -415,7 +516,8 @@ void follow_main()
     while(1) {
         
         if (follow(follow_set, num_follow)) {
-            cout << endl << "follow集如下" << endl;
+            cout << endl << "/********************************follow集：***********************************/" << endl;
+            //cout << endl << "follow集如下" << endl;
             for (unsigned i = 0; i < follow_set.size(); i++) {
                 cout << Grammer.produce[i].key << ":     ";
                 for (unsigned j = 0; j < follow_set[i].size(); j++) {
@@ -425,17 +527,22 @@ void follow_main()
             }
             break;
         }
-        
     }
-
-
+    return follow_set;
 }
 /***********************follow集_end********************/
 
+
 void LL1() {
-    read_file();
-    print_grammer();
-    left_recur();
-    first_main();
-    follow_main();
+    read_file();        //读文件
+    print_grammer();       //输出文法
+    left_recur();           //消除左递归
+    extract_left_factor_main(); //提左因子
+    first_main();           //first集
+
+    vector<vector<string> > follow_set(Grammer.pcount);
+
+    follow_set = follow_main();     //follow集
+
+
 }
