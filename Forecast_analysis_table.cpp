@@ -80,10 +80,10 @@ void create_forecast_table(){        //构建预测分析表
             }
             else{                                             //若第一个字符串是非终结符
                 int if_exit_empty = 0;
-                for (int m=0; m<first_set[tmp_vn].size(); m++){ //判断first集合中是否存在空
+                for (int m=0; m<first_set[tmp_vn].size(); m++){    //判断first集合中是否存在空
                     //cout << first_set[tmp_vn][m] << "   ";
                     if (first_set[tmp_vn][m] == "empty"){
-                        cout << "yes" << endl;
+                        //cout << "yes" << endl;
                         if_exit_empty = 1;
                     }
                 }
@@ -223,10 +223,11 @@ int main(){
     
     for (it = forecast_table.begin(); it!=forecast_table.end(); it++){
         pair<string, string> p = it->first;
-        cout << p.first << "      " << p.second << " :    ";
+        cout << p.first << "      " << p.second << "     ";
         vector<string> v = it->second;
+        cout << p.first << "->";
         for (int i=0; i<v.size(); i++)
-            cout << p.first << "->" << v[i] << " ";
+            cout << v[i] << " ";
         cout << endl;
     }
     
