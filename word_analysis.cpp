@@ -2,6 +2,9 @@
 #include<fstream>
 #include<vector>
 #include<string>
+#include"LL1.h"
+//#include"symbol_table.h"
+
 using namespace std;
 
 
@@ -47,15 +50,15 @@ void del(string name) {//删除符号
 	}
 }
 
-void display(){
-    cout << "                  **符号表**                  " << endl;
-    cout << "---------------------------------------------" << endl;
-    cout << "     符号名     ｜     类型     ｜      值      " << endl;
-    cout << "---------------------------------------------" << endl;
-    for (int i=0; i< Tablelink[0].level_table.size(); i++){
-        cout << "       " << Tablelink[0].level_table[i].identity << "            " << Tablelink[0].level_table[i].type << "             " << Tablelink[0].level_table[i].val;
-        cout << endl;
-    }
+void display() {
+	cout << "                  **符号表**                  " << endl;
+	cout << "---------------------------------------------" << endl;
+	cout << "     符号名     ｜     类型     ｜      值      " << endl;
+	cout << "---------------------------------------------" << endl;
+	for (int i = 0; i < Tablelink[0].level_table.size(); i++) {
+		cout << "       " << Tablelink[0].level_table[i].identity << "            " << Tablelink[0].level_table[i].type << "             " << Tablelink[0].level_table[i].val;
+		cout << endl;
+	}
 }
 
 
@@ -137,7 +140,7 @@ struct Category {
 	string name;
 };
 
-void add_cate(vector<Category> &cate, int num, string name)
+void add_cate(vector<Category>& cate, int num, string name)
 {
 	Category cate_temp;
 	cate_temp.name = name;
@@ -180,19 +183,20 @@ void category(vector<Category>& cate)
 	add_cate(cate, 114, "<");
 	add_cate(cate, 115, ">=");
 	add_cate(cate, 116, "<=");
-
+	 
 	//标识符
 	add_cate(cate, 150, "标识符");
 
 	//常数变量
-	add_cate(cate, 200, "int");
-	add_cate(cate, 201, "char");
-	add_cate(cate, 202, "long");
-	add_cate(cate, 203, "string");
-	add_cate(cate, 204, "short");
-	add_cate(cate, 205, "bool");
-	add_cate(cate, 206, "float");
-	add_cate(cate, 207, "double");
+	add_cate(cate, 200, "常量");
+	//add_cate(cate, 200, "int");
+	//add_cate(cate, 201, "char");
+	//add_cate(cate, 202, "long");
+	//add_cate(cate, 203, "string");
+	//add_cate(cate, 204, "short");
+	//add_cate(cate, 205, "bool");
+	//add_cate(cate, 206, "float");
+	//add_cate(cate, 207, "double");
 
 	//界符
 	add_cate(cate, 300, "(");
@@ -219,7 +223,7 @@ int judge_id(vector<Category> cate, string str)
 }
 
 
-void create_table(vector<Category> cate, string source_str, vector<Category> &source_cate)
+void create_table(vector<Category> cate, string source_str, vector<Category>& source_cate)
 {
 	int flag;
 	int judge;
@@ -243,7 +247,10 @@ void create_table(vector<Category> cate, string source_str, vector<Category> &so
 			}
 			if (judge == 0) {
 				temp.name = str;
-				temp.num = 150;
+				if (str[0] >= '0' && str[0] <= '9')
+					temp.num = 200;
+				else
+					temp.num = 150;
 				source_cate.push_back(temp);
 				if (judge_id(cate, str)) {
 					flag = find(str);
@@ -279,9 +286,12 @@ int main()
 {
 	vector<Category> source_cate;
 	source_cate = lex();
-	for (unsigned i = 0; i < source_cate.size(); i++) {
-		cout << "<" << source_cate[i].num << "," << source_cate[i].name << ">" << endl;
-	}
+	//for (unsigned i = 0; i < source_cate.size(); i++) {
+	//	cout << "<" << source_cate[i].num << "," << source_cate[i].name << ">" << endl;
+	//}
 	display();
+
+	//first_follow();
+	LL1();
 	return 0;
 }
