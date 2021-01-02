@@ -33,7 +33,9 @@ void create_forecast_table(){        //构建预测分析表
     int tmp_vn;
     int vt_or_vn;                  //0是vt，1是vn
     vector<string> e;
+    vector<string> s;
     e.push_back("empty");
+    s.push_back("synch");
     for (int i=0; i<Grammer.pcount; i++){                   //对每一组产生式进行扫描
         
         for (int k=0; k<Grammer.vn.size(); k++){
@@ -116,6 +118,15 @@ void create_forecast_table(){        //构建预测分析表
                                 row = n;
                                 pair<string, string> tmp_index = make_pair(Grammer.vn[line], Grammer.vt[row]);
                                 forecast_table.insert(make_pair(tmp_index, Grammer.produce[i].value[k]));
+                            }
+                        }
+                    }
+                    for (int m = 0; m < follow_set[tmp_vn].size(); m++){             //错误处理
+                        for (int n = 0; n < Grammer.vt.size(); n++) {
+                            if (Grammer.vt[n] == first_set[tmp_vn][m]) {
+                                row = n;
+                                pair<string, string> tmp_index = make_pair(Grammer.vn[line], Grammer.vt[row]);
+                                forecast_table.insert(make_pair(tmp_index, s));
                             }
                         }
                     }
